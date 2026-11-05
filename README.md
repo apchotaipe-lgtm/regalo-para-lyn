@@ -1,4 +1,4 @@
-# Sorpresa para Aylin
+# Sorpresa para Aylyn
 
 La página está en `index.html` y no necesita instalar Python ni dependencias.
 
