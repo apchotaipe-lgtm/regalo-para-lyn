@@ -13,13 +13,13 @@
     :root {
       color-scheme: light;
       --forest: #213a33;
-      --paper: #f5f2e9;
-      --coral: #c85f52;
-      --pink: #f0c4b8;
-      --sage: #dce5d2;
+      --paper: #fff6f3;
+      --coral: #ad3858;
+      --pink: #f3b4c8;
+      --sage: #f0dfe4;
       --ink: #20342e;
       --muted: #64736a;
-      --line: #d8d9cb;
+      --line: #e5cbd0;
       --display: "Playfair Display", Georgia, serif;
       --body: "DM Sans", "Segoe UI", sans-serif;
     }
@@ -79,7 +79,8 @@
     .eyebrow { margin: 0 0 17px; color: var(--pink); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
     h1 { max-width: 760px; margin: 0; font-family: var(--display); font-size: clamp(62px, 10vw, 130px); font-weight: 400; line-height: .96; }
     .hero-copy p:not(.eyebrow) { max-width: 480px; margin: 24px 0 30px; font-family: var(--display); font-size: clamp(20px, 2.4vw, 27px); line-height: 1.5; }
-    .button-link, .reveal-button {
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .button-link, .reveal-button, .rose-button {
       display: inline-flex;
       min-height: 48px;
       align-items: center;
@@ -95,9 +96,12 @@
       cursor: pointer;
       transition: background .2s ease, transform .2s ease;
     }
-    .button-link:hover, .reveal-button:hover { transform: translateY(-2px); background: #ad4d43; }
-    .button-link:focus-visible, .reveal-button:focus-visible, .site-nav a:focus-visible { outline: 3px solid var(--pink); outline-offset: 4px; }
+    .button-link:hover, .reveal-button:hover, .rose-button:hover { transform: translateY(-2px); background: #8f2847; }
+    .rose-button { border-color: rgb(255 255 255 / 62%); background: rgb(255 246 243 / 12%); color: #fff; }
+    .rose-button:hover { background: rgb(255 246 243 / 24%); }
+    .button-link:focus-visible, .reveal-button:focus-visible, .rose-button:focus-visible, .site-nav a:focus-visible { outline: 3px solid var(--pink); outline-offset: 4px; }
     .button-link span { font-size: 18px; }
+    .rose-button span { font-size: 17px; }
     .next-hint { position: absolute; right: 6vw; bottom: 25px; color: #fff; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; writing-mode: vertical-rl; }
 
     .intro { padding: 88px 8vw 96px; background: var(--paper); }
@@ -140,6 +144,11 @@
     .ending-message.visible { display: block; animation: arrive .5s ease both; }
     .heart-mark { margin-top: 34px; color: var(--pink); font-family: var(--display); font-size: 32px; }
     footer { padding: 18px 6vw; background: var(--forest); color: #cbd4ca; text-align: center; font-size: 11px; }
+    .rose-shower { position: fixed; z-index: 20; inset: 0; overflow: hidden; pointer-events: none; }
+    .falling-petal, .falling-rose { position: absolute; top: -12vh; left: var(--x); animation: fall var(--duration) linear var(--delay) forwards; }
+    .falling-petal { width: var(--size); height: calc(var(--size) * 1.45); border-radius: 100% 0 100% 0; background: var(--petal-color); opacity: .94; }
+    .falling-rose { font-size: var(--size); filter: drop-shadow(0 2px 3px rgb(34 20 24 / 20%)); }
+    @keyframes fall { to { transform: translate3d(var(--drift), 118vh, 0) rotate(var(--spin)); } }
 
     @keyframes arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
     @media (max-width: 720px) {
@@ -178,7 +187,12 @@
         <p class="eyebrow">Una sorpresa para ti</p>
         <h1 id="page-title">Aylin,<br>mi lugar bonito.</h1>
         <p>Entre todos los días posibles, qué suerte la mía de compartir algunos contigo.</p>
-        <a class="button-link" href="#carta">Hay algo para ti <span aria-hidden="true">↓</span></a>
+        <div class="hero-actions">
+          <a class="button-link" href="#carta">Hay algo para ti <span aria-hidden="true">↓</span></a>
+          <button class="rose-button" id="rose-button" type="button" aria-label="Lanzar una lluvia de rosas y pétalos">
+            Una lluvia de rosas <span aria-hidden="true">🌹</span>
+          </button>
+        </div>
       </div>
       <span class="next-hint" aria-hidden="true">Desliza despacito</span>
     </section>
@@ -251,6 +265,45 @@
     document.querySelector('#yes-button').addEventListener('click', (event) => {
       document.querySelector('#ending-message').classList.add('visible');
       event.currentTarget.textContent = 'Prometido';
+    });
+
+    let showerTimer;
+    document.querySelector('#rose-button').addEventListener('click', () => {
+      document.querySelector('.rose-shower')?.remove();
+      window.clearTimeout(showerTimer);
+      const shower = document.createElement('div');
+      shower.className = 'rose-shower';
+      shower.setAttribute('aria-hidden', 'true');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      for (let index = 0; index < 38; index += 1) {
+        const petal = document.createElement('span');
+        petal.className = 'falling-petal';
+        petal.style.setProperty('--x', `${Math.random() * 100}vw`);
+        petal.style.setProperty('--size', `${8 + Math.random() * 13}px`);
+        petal.style.setProperty('--duration', `${reducedMotion ? 1 : 3.8 + Math.random() * 3.4}s`);
+        petal.style.setProperty('--delay', `${Math.random() * 1.3}s`);
+        petal.style.setProperty('--drift', `${-100 + Math.random() * 200}px`);
+        petal.style.setProperty('--spin', `${180 + Math.random() * 720}deg`);
+        petal.style.setProperty('--petal-color', ['#c72f59', '#e45579', '#f08caa', '#f5b5c5'][index % 4]);
+        shower.append(petal);
+      }
+
+      for (let index = 0; index < 7; index += 1) {
+        const rose = document.createElement('span');
+        rose.className = 'falling-rose';
+        rose.textContent = '🌹';
+        rose.style.setProperty('--x', `${8 + Math.random() * 84}vw`);
+        rose.style.setProperty('--size', `${24 + Math.random() * 14}px`);
+        rose.style.setProperty('--duration', `${reducedMotion ? 1 : 4.5 + Math.random() * 2.5}s`);
+        rose.style.setProperty('--delay', `${Math.random() * 1.5}s`);
+        rose.style.setProperty('--drift', `${-70 + Math.random() * 140}px`);
+        rose.style.setProperty('--spin', `${-240 + Math.random() * 480}deg`);
+        shower.append(rose);
+      }
+
+      document.body.append(shower);
+      showerTimer = window.setTimeout(() => shower.remove(), reducedMotion ? 1500 : 9000);
     });
   </script>
 </body>
